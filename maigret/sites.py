@@ -181,7 +181,15 @@ class MaigretSite:
         if self.url_regexp:
             match_groups = self.url_regexp.match(url)
             if match_groups:
-                return match_groups.groups()[-1].rstrip("/")
+                username = next(
+                    (
+                        group.rstrip("/")
+                        for group in reversed(match_groups.groups())
+                        if isinstance(group, str) and group
+                    ),
+                    None,
+                )
+                return username
 
         return None
 
@@ -196,8 +204,16 @@ class MaigretSite:
         match_groups = self.url_regexp.match(url)
         if not match_groups:
             return None
-
-        _id = match_groups.groups()[-1].rstrip("/")
+        _id = next(
+            (
+                group.rstrip("/")
+                for group in reversed(match_groups.groups())
+                if isinstance(group, str) and group
+            ),
+            None,
+        )
+        if _id is None:
+            return None
         _type = self.type
 
         return _id, _type
